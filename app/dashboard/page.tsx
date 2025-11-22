@@ -11,33 +11,8 @@ import StudyPlanGenerator from "@/components/StudyPlanGenerator";
 import { motion } from "framer-motion";
 import { Flame, Clock, Target, Users, Bot, BookOpen, TrendingUp, Send, Copy, Check, Sparkles, Brain, FileText, Upload, Save, X, Award, Trophy, Star, Zap, BarChart3, Download, Calendar, TrendingDown, Loader2, AlertTriangle, GraduationCap, Lightbulb } from "lucide-react";
 import toast from "react-hot-toast";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js";
-import { Bar, Pie, Line } from "react-chartjs-2";
+import ChartWrapper from "@/components/ChartWrapper";
 import ReactMarkdown from "react-markdown";
-
-// Register ChartJS components
-import { PointElement, LineElement } from 'chart.js';
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  ArcElement,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
 
 interface Message {
   role: "user" | "ai";
@@ -1503,7 +1478,8 @@ export default function DashboardPage() {
                           Quiz Score Trends
                         </h3>
                         <div className="h-64">
-                          <Line
+                          <ChartWrapper
+                            type="line"
                             data={{
                               labels: analyticsData.quizzes.map((q: any) => q.date),
                               datasets: [
@@ -1531,7 +1507,7 @@ export default function DashboardPage() {
                                 },
                                 tooltip: {
                                   callbacks: {
-                                    afterLabel: function(context) {
+                                    afterLabel: function(context: any) {
                                       const index = context.dataIndex;
                                       return `Topic: ${analyticsData.quizzes[index].topic}`;
                                     }
@@ -1717,7 +1693,7 @@ export default function DashboardPage() {
               className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-white/20"
             >
               <div className="h-80">
-                <Bar data={studyHoursData} options={studyHoursOptions} />
+                <ChartWrapper type="bar" data={studyHoursData} options={studyHoursOptions} />
               </div>
             </motion.div>
 
@@ -1729,7 +1705,7 @@ export default function DashboardPage() {
               className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-white/20"
             >
               <div className="h-80">
-                <Pie data={quizScoresData} options={quizScoresOptions} />
+                <ChartWrapper type="pie" data={quizScoresData} options={quizScoresOptions} />
               </div>
             </motion.div>
           </div>
