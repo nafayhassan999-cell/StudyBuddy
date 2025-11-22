@@ -12,7 +12,7 @@ const nextConfig = {
     unoptimized: false,
   },
   
-  webpack: (config, { isServer }) => {
+  webpack: (config, { isServer, dev }) => {
     if (isServer) {
       config.resolve.alias.canvas = false;
       config.resolve.alias.encoding = false;
@@ -23,6 +23,20 @@ const nextConfig = {
     if (isServer) {
       config.externals.push('canvas');
     }
+    
+    // Optimize cache performance - reduce serialization warnings
+    if (dev) {
+      config.infrastructureLogging = {
+        level: 'error',
+      };
+    }
+    
+    // Optimize cache to handle large strings
+    config.cache = {
+      ...config.cache,
+      compression: 'gzip',
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+    };
     
     return config;
   },

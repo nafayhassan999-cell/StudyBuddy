@@ -706,10 +706,10 @@ export default function DashboardPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Check file size (2MB limit)
-    const maxSize = 2 * 1024 * 1024; // 2MB
+    // Check file size (5MB limit)
+    const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
-      toast.error('File size must be less than 2MB', {
+      toast.error('File size must be less than 5MB', {
         icon: '⚠️',
         duration: 3000,
       });
@@ -761,9 +761,10 @@ export default function DashboardPage() {
       } else {
         throw new Error(data.error || 'Failed to summarize document');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Summarize error:', error);
-      toast.error('Failed to summarize document. Please try again.');
+      const errorMessage = error?.message || 'Failed to summarize document. Please try again.';
+      toast.error(errorMessage);
       setSummary('');
     } finally {
       setIsUploading(false);
