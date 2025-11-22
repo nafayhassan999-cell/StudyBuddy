@@ -81,12 +81,13 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     return pathname.startsWith(href);
   };
 
-  const handleLinkClick = (hash?: string) => {
+  const handleLinkClick = (hash?: string, href?: string) => {
+    console.log('Sidebar navigation:', { href, hash, pathname });
     onClose();
     if (hash) {
       setTimeout(() => {
         const element = document.querySelector(hash);
-        element?.scrollIntoView({ behavior: "smooth" });
+        element?.scrollIntoView({ behavior: 'smooth' });
       }, 100);
     }
   };
@@ -142,7 +143,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 <div className="space-y-1">
                   <Link
                     href="/dashboard"
-                    onClick={() => handleLinkClick()}
+                    onClick={() => handleLinkClick(undefined, '/dashboard')}
                     className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group ${
                       pathname === "/dashboard"
                         ? "bg-gradient-to-r from-gray-600/20 to-gray-700/20 border border-gray-500/30"
@@ -191,7 +192,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                       <Link
                         key={link.label}
                         href={link.href! + (link.hash || "")}
-                        onClick={() => handleLinkClick(link.hash)}
+                        onClick={() => handleLinkClick(link.hash, link.href)}
                         className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group ${
                           isActive(link.href!)
                             ? "bg-gradient-to-r from-gray-600/20 to-gray-700/20 border border-gray-500/30"
@@ -220,7 +221,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                     <Link
                       key={link.label}
                       href={link.href}
-                      onClick={() => handleLinkClick()}
+                      onClick={() => handleLinkClick(undefined, link.href)}
                       className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group ${
                         isActive(link.href)
                           ? "bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-400/30"

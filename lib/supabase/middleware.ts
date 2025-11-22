@@ -31,25 +31,44 @@ export async function updateSession(request: NextRequest) {
   // supabase.auth.getUser(). A simple mistake could make it very hard to debug
   // issues with users being randomly logged out.
 
+  // Skip middleware for API routes, static files, and auth pages
+  if (
+    request.nextUrl.pathname.startsWith('/api') ||
+    request.nextUrl.pathname.startsWith('/auth') ||
+    request.nextUrl.pathname.startsWith('/_next')
+  ) {
+    return supabaseResponse
+  }
+
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Protect auth routes - redirect to login if not authenticated
-  if (
-    !user &&
-    request.nextUrl.pathname.startsWith('/dashboard') ||
-    request.nextUrl.pathname.startsWith('/profile') ||
-    request.nextUrl.pathname.startsWith('/groups') ||
-    request.nextUrl.pathname.startsWith('/courses') ||
-    request.nextUrl.pathname.startsWith('/chat') ||
-    request.nextUrl.pathname.startsWith('/exam') ||
-    request.nextUrl.pathname.startsWith('/leaderboard') ||
-    request.nextUrl.pathname.startsWith('/search') ||
-    request.nextUrl.pathname.startsWith('/requests')
-  ) {
+  // Debug logging
+  console.log('Middleware - Path:', request.nextUrl.pathname, 'User:', user?.email || 'none')
+
+  // Protect authenticated routes - redirect to login if not authenticated
+  const protectedPaths = [
+    '/dashboard',
+    '/profile',
+    '/groups',
+    '/courses',
+    '/chat',
+    '/exam',
+    '/leaderboard',
+    '/search',
+    '/requests',
+    '/report'
+  ]
+
+  const isProtectedPath = protectedPaths.some(path => 
+    request.nextUrl.pathname.startsWith(path)
+  )
+
+  if (!user && isProtectedPath) {
     const url = request.nextUrl.clone()
     url.pathname = '/auth/login'
+    console.log('Middleware - Redirecting to login from:', request.nextUrl.pathname)
     return NextResponse.redirect(url)
   }
 
