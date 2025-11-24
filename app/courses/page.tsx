@@ -15,7 +15,6 @@ import {
   TrendingUp,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import ChartWrapper from "@/components/ChartWrapper";
 
 interface Course {
   id: string;
@@ -201,39 +200,6 @@ export default function CoursesPage() {
     },
   };
 
-  // Mock data for the chart
-  const progressData = {
-    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6'],
-    datasets: [
-      {
-        label: 'Learning Hours',
-        data: [2, 4.5, 3, 6, 5.5, 8],
-        borderColor: 'rgba(168, 85, 247, 1)', // purple-500
-        backgroundColor: 'rgba(168, 85, 247, 0.2)',
-        tension: 0.4,
-        fill: true,
-        pointBackgroundColor: 'rgba(168, 85, 247, 1)',
-        pointBorderColor: '#fff',
-        pointBorderWidth: 2,
-        pointRadius: 4,
-        pointHoverRadius: 6,
-      },
-      {
-        label: 'Courses Completed',
-        data: [0, 1, 1, 2, 2, 3],
-        borderColor: 'rgba(59, 130, 246, 1)', // blue-500
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-        tension: 0.4,
-        fill: true,
-        pointBackgroundColor: 'rgba(59, 130, 246, 1)',
-        pointBorderColor: '#fff',
-        pointBorderWidth: 2,
-        pointRadius: 4,
-        pointHoverRadius: 6,
-      }
-    ],
-  };
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center">
@@ -269,50 +235,6 @@ export default function CoursesPage() {
               </p>
             </div>
           </div>
-
-          {/* Learning Progress Chart */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="mb-8 bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10 shadow-xl"
-          >
-            <div className="flex items-center gap-2 mb-6">
-              <TrendingUp className="w-5 h-5 text-purple-400" />
-              <h2 className="text-xl font-bold text-white">Learning Trends</h2>
-            </div>
-            <div className="h-64 w-full">
-              <ChartWrapper
-                type="line"
-                data={progressData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: {
-                    legend: {
-                      position: 'top',
-                      labels: { color: '#e5e7eb' }
-                    },
-                    tooltip: {
-                      mode: 'index',
-                      intersect: false,
-                    }
-                  },
-                  scales: {
-                    y: {
-                      beginAtZero: true,
-                      grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                      ticks: { color: '#9ca3af' }
-                    },
-                    x: {
-                      grid: { display: false },
-                      ticks: { color: '#9ca3af' }
-                    }
-                  }
-                }}
-              />
-            </div>
-          </motion.div>
 
           {/* Search Bar */}
           <motion.div
