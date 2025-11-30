@@ -1,0 +1,15 @@
+# Test files - exclude from Vercel build
+__tests__/
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+vitest.config.ts
+vitest.config.js
+.vitest/
+coverage/
+
+# Development files
+*.md
+!README.md
+.vscode/
