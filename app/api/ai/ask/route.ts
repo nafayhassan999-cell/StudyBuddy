@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { callGemini } from "@/lib/gemini";
+import { callGemini, getFallbackResponse } from "@/lib/gemini";
 
 // CORS headers for development
 const corsHeaders = {
@@ -131,26 +131,55 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("Error in AI ask endpoint:", error);
 
+    // Get the original prompt for fallback
+    let originalPrompt = "";
+    try {
+      const body = await req.clone().json();
+      originalPrompt = body.prompt || "";
+    } catch {}
+
     // Check if it's an API key error
     if (error instanceof Error && error.message.includes("Missing GEMINI_API_KEY")) {
       return NextResponse.json(
         {
-          error: "AI service is not configured",
+          reply: getFallbackResponse(originalPrompt),
+          fallback: true,
         },
         {
-          status: 503,
+          status: 200,
           headers: corsHeaders,
         }
       );
     }
 
-    // Generic error response
+    // Check for rate limit / overload errors - return fallback response
+    if (error instanceof Error && (
+      error.message.includes("overloaded") || 
+      error.message.includes("busy") ||
+      error.message.includes("Rate limit") ||
+      error.message.includes("quota") ||
+      error.message.includes("429")
+    )) {
+      return NextResponse.json(
+        {
+          reply: getFallbackResponse(originalPrompt),
+          fallback: true,
+        },
+        {
+          status: 200,
+          headers: corsHeaders,
+        }
+      );
+    }
+
+    // For any other error, return fallback response instead of error
     return NextResponse.json(
       {
-        error: "Try again",
+        reply: getFallbackResponse(originalPrompt),
+        fallback: true,
       },
       {
-        status: 429,
+        status: 200,
         headers: corsHeaders,
       }
     );

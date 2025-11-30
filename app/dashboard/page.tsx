@@ -11,33 +11,8 @@ import StudyPlanGenerator from "@/components/StudyPlanGenerator";
 import { motion } from "framer-motion";
 import { Flame, Clock, Target, Users, Bot, BookOpen, TrendingUp, Send, Copy, Check, Sparkles, Brain, FileText, Upload, Save, X, Award, Trophy, Star, Zap, BarChart3, Download, Calendar, TrendingDown, Loader2, AlertTriangle, GraduationCap, Lightbulb } from "lucide-react";
 import toast from "react-hot-toast";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js";
-import { Bar, Pie, Line } from "react-chartjs-2";
+import ChartWrapper from "@/components/ChartWrapper";
 import ReactMarkdown from "react-markdown";
-
-// Register ChartJS components
-import { PointElement, LineElement } from 'chart.js';
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  ArcElement,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
 
 interface Message {
   role: "user" | "ai";
@@ -660,6 +635,13 @@ export default function DashboardPage() {
           logStudyActivity();
           // Increment AI usage count for badge tracking
           incrementAiUsageCount();
+        } else if (response.status === 429) {
+          // Rate limit error - show friendly message
+          setMessages((prev) => [
+            ...prev,
+            { role: "ai", text: "🔄 I'm a bit busy right now! Please wait about 30 seconds and try again. The AI service has rate limits to ensure fair usage for everyone." },
+          ]);
+          toast.error("AI is rate limited. Please wait and try again.", { duration: 5000 });
         } else {
           // Add error message
           setMessages((prev) => [
@@ -675,7 +657,7 @@ export default function DashboardPage() {
       setIsSending(false);
       setMessages((prev) => [
         ...prev,
-        { role: "ai", text: "Sorry, something went wrong. Please try again." },
+        { role: "ai", text: "Sorry, something went wrong. Please check your connection and try again." },
       ]);
       toast.error("Failed to connect to AI");
     }
@@ -1503,7 +1485,8 @@ export default function DashboardPage() {
                           Quiz Score Trends
                         </h3>
                         <div className="h-64">
-                          <Line
+                          <ChartWrapper
+                            type="line"
                             data={{
                               labels: analyticsData.quizzes.map((q: any) => q.date),
                               datasets: [
@@ -1531,7 +1514,7 @@ export default function DashboardPage() {
                                 },
                                 tooltip: {
                                   callbacks: {
-                                    afterLabel: function(context) {
+                                    afterLabel: function(context: any) {
                                       const index = context.dataIndex;
                                       return `Topic: ${analyticsData.quizzes[index].topic}`;
                                     }
@@ -1717,7 +1700,7 @@ export default function DashboardPage() {
               className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-white/20"
             >
               <div className="h-80">
-                <Bar data={studyHoursData} options={studyHoursOptions} />
+                <ChartWrapper type="bar" data={studyHoursData} options={studyHoursOptions} />
               </div>
             </motion.div>
 
@@ -1729,7 +1712,7 @@ export default function DashboardPage() {
               className="bg-white/10 backdrop-blur-md rounded-2xl p-6 shadow-xl border border-white/20"
             >
               <div className="h-80">
-                <Pie data={quizScoresData} options={quizScoresOptions} />
+                <ChartWrapper type="pie" data={quizScoresData} options={quizScoresOptions} />
               </div>
             </motion.div>
           </div>
@@ -1748,58 +1731,72 @@ export default function DashboardPage() {
             </div>
             
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => chatContainerRef.current?.scrollIntoView({ behavior: "smooth" })}
-                className="flex items-center justify-center space-x-3 px-6 py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300"
-              >
-                <Bot className="w-5 h-5" />
-                <span>Ask AI Tutor</span>
-              </motion.button>
+              {/* AI Tools - Link to separate pages */}
+              <Link href="/ai-tutor">
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center justify-center space-x-3 px-6 py-4 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer"
+                >
+                  <Bot className="w-5 h-5" />
+                  <span>AI Tutor</span>
+                </motion.div>
+              </Link>
               
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setIsFlashcardModalOpen(true)}
-                className="flex items-center justify-center space-x-3 px-6 py-4 bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300"
-              >
-                <Sparkles className="w-5 h-5" />
-                <span>Generate Flashcards</span>
-              </motion.button>
+              <Link href="/summarizer">
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center justify-center space-x-3 px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer"
+                >
+                  <FileText className="w-5 h-5" />
+                  <span>Summarizer</span>
+                </motion.div>
+              </Link>
               
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setIsQuizModalOpen(true)}
-                className="flex items-center justify-center space-x-3 px-6 py-4 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300"
-              >
-                <Brain className="w-5 h-5" />
-                <span>Generate Quiz</span>
-              </motion.button>
+              <Link href="/study-plan">
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center justify-center space-x-3 px-6 py-4 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer"
+                >
+                  <Lightbulb className="w-5 h-5" />
+                  <span>Study Plan</span>
+                </motion.div>
+              </Link>
 
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => router.push('/exam')}
-                className="flex items-center justify-center space-x-3 px-6 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-teal-600 hover:to-emerald-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300"
-              >
-                <GraduationCap className="w-5 h-5" />
-                <span>AI Exam</span>
-              </motion.button>
+              <Link href="/flashcards">
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center justify-center space-x-3 px-6 py-4 bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer"
+                >
+                  <Sparkles className="w-5 h-5" />
+                  <span>Flashcards</span>
+                </motion.div>
+              </Link>
+              
+              <Link href="/quiz">
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center justify-center space-x-3 px-6 py-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer"
+                >
+                  <Brain className="w-5 h-5" />
+                  <span>Quiz Generator</span>
+                </motion.div>
+              </Link>
 
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => {
-                  const element = document.querySelector('#study-plan');
-                  element?.scrollIntoView({ behavior: 'smooth' });
-                }}
-                className="flex items-center justify-center space-x-3 px-6 py-4 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300"
-              >
-                <Lightbulb className="w-5 h-5" />
-                <span>Study Plan</span>
-              </motion.button>
+              <Link href="/exam">
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center justify-center space-x-3 px-6 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-teal-600 hover:to-emerald-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer"
+                >
+                  <GraduationCap className="w-5 h-5" />
+                  <span>AI Exam</span>
+                </motion.div>
+              </Link>
 
               <motion.button
                 whileHover={{ scale: 1.05 }}
